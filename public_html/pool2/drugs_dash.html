@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>NodaVare - ADS bid response</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--Angular include-->
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script>   
+    <!--Bootstrap include-->
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+
+    
+    <script src="../static/bower_components/jquery/dist/jquery.min.js"></script>
+    
+    <!--script src="./static/js/min/jquery-xdomainrequest.js"></script-->
+    
+    <!--script src="./static/bower_components/bootstrap/dist/js/bootstrap.min.js"></script-->
+    
+    <!--script src="./static/js/min/modernizr.custom.js"></script-->
+    
+    <script src="../static/bower_components/d3/d3.min.js"></script>
+    
+    <script src="../static/js/c3/c3.min.js"></script>
+    
+    <script src="../static/bower_components/c3/c3.min.js"></script>
+    
+    <script src="../static/js/drugs_dash_controller.js"></script>
+    
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300' rel='stylesheet' type='text/css'>
+    
+    <!-- Including this causes bootstrap templates to not work properly-->
+    <link href="../static/css/style.css" rel="stylesheet">
+    
+    
+    <script src="../static/bower_components/jquery-autosize/jquery.autosize.min.js"></script>
+
+</head>
+
+  <body>
+      
+    <nav class="navbar navbar-inverse">
+      <div class="container-fluid" >
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>                        
+          </button>
+            <a class="navbar-brand" href="#">NodaVare - ADS RFQ Response, Pool 2</a>
+          </div>
+      </div>
+    </nav>
+      
+    <div class="container-fluid" ng-app="homeApp" ng-controller="homeController">
+        
+      <!-- First row-->
+      <div class="row" ng-model="viewState">
+          
+        <div class="col-md-9" ng-switch="viewState">
+            
+          <div ng-switch-when="home">
+            <div class="panel panel-primary">
+                <div class="panel-heading">Introduction</div>
+                <div class="panel-body">
+                  <p>This web application is a working design and development prototype using datasets and APIs from openFDA. 
+                 This prototype is being delivered by NodaVare Corporation's in response to the requirement in   
+                 RFQ 4QTFHS150004, Agile Delivery Services (ADS I), Pool 2 for the U.S. General Services Administration.</p>
+                <p>Scenario - In this Pool 2 working prototype, we designed and built a web application to show the correlation of adverse drug event reports to recalls. We proceeded to show the top drugs with adverse reports since 2004. Then, we show the list of recalls for the drug against the timeline showing the adverse reports.
+                    It is interesting to see the positive and negative spikes correlation between the two graphs. In Sprint 2, we understood from our users that there is value in showing this correlation specifically for serious cases and serious recalls where disability or death is resulted.
+                 </p>
+               
+                </div>
+            </div>
+          </div>
+          
+          <div ng-switch-when="start">
+            <div class="alert alert-info" role="alert">Adverse drug event reports since 2004</div>
+          </div>
+           <div ng-switch-when="adversereports">
+            <div class="alert alert-info" role="alert">{{drugclicked}} - Adverse drug event reports</div>
+          </div> 
+          <div ng-if="!isHome" id="theChart" ></div>
+        </div>
+          
+        <div class="col-md-3" ng-switch="viewState">
+            
+            <div ng-switch-when="home">
+            </div>
+            <div ng-switch-when="start">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Description</h3>
+                    </div>
+                    <div class="panel-body">
+                      These drugs were top on the list for adverse events reported since 2004.
+                      Click on a drug to view further details.
+                    </div>
+                </div>
+            </div>
+            <div ng-switch-when="adversereports">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Recalls</h3>
+                    </div>
+                    <div ng-if="doesdrughaverecalls" class="panel-body">
+                        <p>This product has recalls.</p> 
+                      <button type="button" class="btn btn-primary" ng-click="loadRecallData()">View Recalls</button>
+                    </div>
+                    <div ng-if="!doesdrughaverecalls" class="panel-body">
+                        <p>This product does not have any recalls.</p> 
+                    </div>
+                    
+                </div>
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Serious Reports</h3>
+                    </div>
+                    <div ng-if="seriousreports" class="panel-body">
+                        <p>Reports with cases of death, disability or other serious conditions</p> 
+                      <button type="button" class="btn btn-primary" ng-click="loadSeriousAction()">View Serious Cases</button>
+                    </div>
+                    <div ng-if="!seriousreports" class="panel-body">
+                        <p>This product does not have any serious reports</p> 
+                    </div>
+                    
+                </div>
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Serious Recalls</h3>
+                    </div>
+                    <div ng-if="seriousrecalls" class="panel-body">
+                        <p>Recalls against serious reports</p> 
+                      <button type="button" class="btn btn-primary" ng-click="loadSeriousRecallAction()">View Serious Recalls</button>
+                    </div>
+                    <div ng-if="!seriousrecalls" class="panel-body">
+                        <p>This product does not have any serious recalls</p> 
+                    </div>
+                    
+                </div>
+            </div>
+            
+        </div>
+      </div>
+      
+      
+      <div class="row" ng-model="viewState">
+          
+        <div class="col-md-9" ng-switch="viewState">
+            
+          <div ng-switch-when="home">
+             <button type="button" class="btn btn-primary" ng-click="getHomeChart()">Start Demo</button>
+          </div>
+          <div ng-switch-when="start">
+              <button type="button" class="btn btn-primary" ng-click="setViewState('home')">Home</button>
+          </div>
+          <div ng-switch-when="adversereports">
+              <button type="button" class="btn btn-primary" ng-click="setViewState('home')">Home</button>
+              <button type="button" class="btn btn-primary" ng-click="getHomeChart()">Go Back to Drugs List</button>
+          </div>
+            
+        </div>
+          
+        <div class="col-md-3" ng-switch="viewState">
+            
+            <div ng-switch-when="home">
+            </div>
+            <div ng-switch-when="start">
+            </div>
+            
+        </div>
+      </div>
+      
+ 
+        
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.15/angular.min.js"></script>
+
+  </body>
+</html>
